@@ -2,53 +2,38 @@ import {useState, useEffect} from 'react';
 
 
 function App() {
-  const [loading, setLoading] = useState(true);
-  const [myMoney, setMyMoney] =useState("");
-  const [coinPrice, setCoinPrice] = useState(Infinity);
-  const [resultMoney, setResultMoney] = useState(0);
-  const [coins, setCoins] = useState([]);
-  const [symbols, setSymbols] = useState("");
-    useEffect(() => {
-    fetch("https://api.coinpaprika.com/v1/tickers")
-    .then(response => response.json( ))
-    .then((json) => 
-    setCoins(json));
-    setLoading(false);
-  }, [])
-
+  const [loading, setLoading] =useState(true);
+  const [movies, setMovies] = useState([]);
+  const getMovies = async() => {
+    const json = await (
+      await fetch(
+      `https://yts.mx/api/v2/list_movies.jsonminimum_rating=8.8&sort_by=year`
+      )
+      ).json();
+      setMovies(json.data.movies);
+      setLoading(false);
+  }
   useEffect(() => {
-    setResultMoney(myMoney/coinPrice);
-  }, [myMoney, coinPrice]);
-
-  const onChange = (event) => setMyMoney(event.target.value);
-
-  const onChangeSelect = (event) => {
-    const price = coins[event.target.selectedIndex].quotes.USD.price;
-    const symbol = coins[event.target.selectedIndex].symbol;
-    setCoinPrice(parseFloat(price));
-    setSymbols(symbol);
-  };
-
+    getMovies();
+  }, [])
 
   return (
     <div>
-      <h1>The Coins {loading ? "" : `(${coins.length})`} </h1>
-      <form >
-      <input value={myMoney} type="number" placeholder="how much money do you have" onChange={onChange} />
-
-      </form>
-      <hr/>
-      {loading ? (<strong>Loading...</strong>) : (<select onChange={onChangeSelect}>
-        {coins.map((coin) => (
-        <option key={coin.id}>
-          {coin.name} ({coin.symbol}) : ${coin.quotes.USD.price} USD
-          </option>
+      {loading ? <h1>Loading...</h1> : (
+      <div>{movies.map((movie) => (
+      <div key={movie.id}>
+        <img src={movie.medium_cover_image}/>
+        <h2 >{movie.title}</h2>
+        <p>{movie.summary}</p>
+        <ul>
+          {movie.genres.map((g) => (
+            <li key={g}>{g}</li>
           ))}
-      </select>
+        </ul>
+      </div>
+      ))}
+      </div>
       )}
-      <h4>
-        your money : ${myMoney} === {resultMoney} {symbols}
-      </h4>
     </div>
   );
 }
